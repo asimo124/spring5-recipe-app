@@ -4,9 +4,11 @@ import guru.springframework.domain.*;
 import guru.springframework.repositories.CategoryRepository;
 import guru.springframework.repositories.RecipeRepository;
 import guru.springframework.repositories.UnitOfMeasureRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Optional;
@@ -16,6 +18,8 @@ import java.util.Set;
  * Created by jt on 7/25/18.
  */
 @Component
+@Slf4j
+@Transactional
 public class DataLoader implements CommandLineRunner {
 
     private RecipeRepository recipeRepository;
@@ -36,6 +40,7 @@ public class DataLoader implements CommandLineRunner {
 
     private void loadData() {
 
+        log.debug("running loadData() function");
          /*/
         // SQL to check data was inserted
         select c.description, r.description, r.difficulty, r.cook_time, r.prep_time, r.servings,
@@ -54,7 +59,7 @@ public class DataLoader implements CommandLineRunner {
         on i.unit_of_measure_id = uom.id
         //*/
 
-        Set<Recipe> recipes = new HashSet<>();
+        log.debug("Loading Category and UOM Entities");
 
         /**
          * Categories
@@ -160,10 +165,12 @@ public class DataLoader implements CommandLineRunner {
 
         Recipe savedRecipe1 = recipeRepository.save(recipe1);
 
+        log.debug("Saved first recipe.");
+
         //categoryAmerican.getRecipes().add(savedRecipe1);
 
         savedRecipe1.getCategories().add(categoryAmerican);
-        //savedRecipe1.getCategories().add(categoryMexican);
+        savedRecipe1.getCategories().add(categoryMexican);
 
 
         /**
@@ -188,6 +195,8 @@ public class DataLoader implements CommandLineRunner {
         savedRecipe1.addIngredient(ingredient8);
 
         recipeRepository.save(savedRecipe1);
+
+        log.debug("Added categories and ingredients to first recipe");
 
 
         // Recipe 2
@@ -234,16 +243,18 @@ public class DataLoader implements CommandLineRunner {
 
         Recipe savedRecipe2 = recipeRepository.save(recipe2);
 
+        log.debug("Saved second recipe.");
+
         // Category - American
         //*/
-        Optional<Category> optionalCategoryAmerican2 = categoryRepository.findCategoryByDescription("Mexican");
+        Optional<Category> optionalCategoryAmerican2 = categoryRepository.findCategoryByDescription("American");
         if (!optionalCategoryAmerican2.isPresent()) {
             throw new RuntimeException("No American Category.");
         }
         Category categoryAmerican2 = optionalCategoryAmerican2.get();
 
         savedRecipe2.getCategories().add(categoryAmerican2);
-        //savedRecipe2.getCategories().add(categoryMexican);
+        savedRecipe2.getCategories().add(categoryMexican);
         //*/
 
         //Recipe savedRecipe2_1 = recipeRepository.save(savedRecipe2);
@@ -292,6 +303,9 @@ public class DataLoader implements CommandLineRunner {
         savedRecipe2.addIngredient(ingredient28);
 
         recipeRepository.save(savedRecipe2);
+
+        log.debug("Added categories and ingredients to second recipe.");
+        log.debug("Completed loading data.");
         //*/
     }
 }

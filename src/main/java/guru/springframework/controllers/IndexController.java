@@ -4,6 +4,7 @@ import guru.springframework.domain.Category;
 import guru.springframework.domain.UnitOfMeasure;
 import guru.springframework.repositories.CategoryRepository;
 import guru.springframework.repositories.UnitOfMeasureRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import java.util.Optional;
  * Created by jt on 6/1/17.
  */
 @Controller
+@Slf4j
 public class IndexController {
 
     private CategoryRepository categoryRepository;
@@ -27,24 +29,24 @@ public class IndexController {
     @RequestMapping({"", "/", "/index"})
     public String getIndexPage(Model model){
 
+        log.debug("Loading Mexican Category and Ounce UOM Entities");
+
         Optional<Category> categoryOptional = categoryRepository.findCategoryByDescription("Mexican");
         //Optional<Category> categoryOptional = categoryRepository.findCategoryByDescription("Mexican2");
         Optional<UnitOfMeasure> unitOfMeasureOptional = unitOfMeasureRepository.findUnitOfMeasureByDescription("Ounce");
         //Optional<UnitOfMeasure> unitOfMeasureOptional = unitOfMeasureRepository.findUnitOfMeasureByDescription("Ounce3");
 
-        if (categoryOptional.isPresent()) {
-            model.addAttribute("hasCategory", "1");
-            categoryOptional.ifPresent(o -> model.addAttribute("category", o));
-        } else {
-            model.addAttribute("hasCategory", "0");
+        if (!categoryOptional.isPresent()) {
+            throw new RuntimeException("No Mexican Category found.");
         }
-        if (unitOfMeasureOptional.isPresent()) {
-            model.addAttribute("hasUOM", "1");
-            unitOfMeasureOptional.ifPresent(o -> model.addAttribute("unitOfMeasure", o));
-        } else {
-            model.addAttribute("hasUOM", "0");
-        }
+        model.addAttribute("category", categoryOptional.get());
 
+        if (!unitOfMeasureOptional.isPresent()) {
+            throw new RuntimeException("No Ounce Unit of Measure found.");
+        }
+        model.addAttribute("unitOfMeasure", unitOfMeasureOptional.get());
+
+        log.debug("Displaying Index Page template.");
         return "index";
     }
 }

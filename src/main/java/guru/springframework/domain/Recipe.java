@@ -1,15 +1,10 @@
 package guru.springframework.domain;
 
-import guru.springframework.repositories.IngredientRepository;
-import guru.springframework.repositories.RecipeRepository;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.Fetch;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -34,7 +29,7 @@ public class Recipe {
     @Lob
     private String directions;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "recipe_category",
         joinColumns = @JoinColumn(name = "recipe_id"),
         inverseJoinColumns = @JoinColumn(name = "category_id"))
@@ -54,6 +49,11 @@ public class Recipe {
 
     public Recipe() {
 
+    }
+
+    public void setNotes(Notes notes) {
+        this.notes = notes;
+        notes.setRecipe(this);
     }
 
     public Recipe addIngredient(Ingredient ingredient) {
